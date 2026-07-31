@@ -5,7 +5,13 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core.hosts_manager import HostsManager
-from core.dpi_engine.windows_engine import WindowsDPIEngine
+
+if sys.platform == "win32":
+    from core.dpi_engine.windows_engine import WindowsDPIEngine as DPIEngine
+    BIN_DIR = os.path.join(os.path.dirname(__file__), "bin", "win")
+else:
+    from core.dpi_engine.linux_engine import LinuxDPIEngine as DPIEngine
+    BIN_DIR = os.path.join(os.path.dirname(__file__), "bin", "linux")
 
 def main():
     if len(sys.argv) < 4:
@@ -23,15 +29,13 @@ def main():
             rules = hm.fetch_unlock_rules("https://example.com/hosts.txt")
             hm.apply_rules(rules)
         if dpi_enabled:
-            bin_dir = os.path.join(os.path.dirname(__file__), "bin", "win")
-            engine = WindowsDPIEngine(bin_dir)
+            engine = DPIEngine(BIN_DIR)
             engine.start()
 
     elif action == "stop":
         hm = HostsManager()
         hm.remove_rules()
-        bin_dir = os.path.join(os.path.dirname(__file__), "bin", "win")
-        engine = WindowsDPIEngine(bin_dir)
+        engine = DPIEngine(BIN_DIR)
         engine.stop()
 
 if __name__ == "__main__":

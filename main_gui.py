@@ -96,7 +96,8 @@ class UniversalUnlockerApp(ctk.CTk):
         """
         Запускает воркер с запросом прав Администратора/Root на лету.
         """
-        worker_script = os.path.join(os.path.dirname(__file__), "worker.py")
+        base_dir = os.path.dirname(__file__)
+        worker_script = os.path.join(base_dir, "worker.py")
         hosts_flag = "1" if self.hosts_var.get() else "0"
         dpi_flag = "1" if self.dpi_var.get() else "0"
         
@@ -110,7 +111,9 @@ class UniversalUnlockerApp(ctk.CTk):
             else:
                 # Элевация на Linux (запрашивает пароль через pkexec)
                 self.log("Запрос прав Root (Linux)...")
-                subprocess.Popen(["pkexec", sys.executable, worker_script, action, hosts_flag, dpi_flag])
+                venv_python = os.path.join(base_dir, "venv", "bin", "python")
+                py_exec = venv_python if os.path.exists(venv_python) else sys.executable
+                subprocess.Popen(["pkexec", py_exec, worker_script, action, hosts_flag, dpi_flag])
             
             self.log(f"Команда '{action}' отправлена воркеру.")
         except Exception as e:
